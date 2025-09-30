@@ -1,0 +1,12 @@
+# 忽略日志文件
+*.log
+
+# 忽略临时文件
+*.tmp
+*.swp
+
+# 忽略 node_modules 目录
+.vscode/
+
+# 忽略本地配置文件
+config/local.json
