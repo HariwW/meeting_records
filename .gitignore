@@ -7,6 +7,7 @@
 
 # 忽略 node_modules 目录
 .vscode/
+.bashscripts/
 
 # 忽略本地配置文件
 config/local.json
