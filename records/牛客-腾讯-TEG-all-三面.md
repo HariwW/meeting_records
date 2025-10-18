@@ -1,9 +1,54 @@
-##
+## 来自牛客的部分三面面经
 
 ### 计费组
-自我介绍
-实习遇到的难题，如何解决
+#### 1. 实习遇到的难题，如何解决？
+可以讲ES宽表建设中对于局部有序性的问题。
+
+##### 业务主键保证同一分区
+把消息 key 设为业务主键（coupon_id / user_id / entitlement_id 等），并在消息中携带单调递增的版本字段（binlog commit_ts、binlog pos 或业务版本号）。
+
+##### 在 ES 侧使用外部版本控制（简洁、靠 ES 保证幂等）
+Elasticsearch 支持 version + version_type=external，消费者把 binlog 的增量 version（例如 commit_ts）作为版本号索引文档，ES 只会在外部版本比现有版本 大 时替换文档。
+
+``` bash
+PUT /coupons/_doc/{id}?version=1697623456000&version_type=external
+{
+  "id": "...",
+  "amount": 100,
+  "updated_at": "2025-10-17T12:34:16Z",
+  ...
+}
+
+```
+
+##### 外部轻量存储
+
+典型做法：消费者在接到消息后，先在轻量外部状态存储（比如 Redis）做原子比较并更新：只有当 incoming_version > stored_version 时才继续写 ES。用 Redis Lua 脚本保证比较+写入版本的原子性。
+``` lua
+-- KEYS[1] = "ver:entitlement:{id}"
+-- ARGV[1] = incoming_version
+local cur = redis.call("GET", KEYS[1])
+if not cur or tonumber(ARGV[1]) > tonumber(cur) then
+  redis.call("SET", KEYS[1], ARGV[1])
+  return 1
+end
+return 0
+```
+消费流程：
+
+1. 收到消息（id, version, payload）
+
+2. 调 Redis Lua（比较并尝试写入版本）
+
+3. 如果返回 1 → 写入 ES（普通 upsert 或 index）
+
+3. 如果返回 0 → 丢弃或记录为过期消息
+
+这个也同时需要做一些补偿
+
 注册中心会遇到什么难点？
+
+
 服务熔断和降级如何考虑和实现的？
 如何应对服务假死的问题？
 C语言和Go了解吗？
