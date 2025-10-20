@@ -19,7 +19,7 @@ echo Adding changes...
 git add .
 
 echo.
-echo Committing: !comment!
+echo Committing: "!comment!"
 git commit -m "!comment!"
 
 echo.
@@ -27,7 +27,7 @@ echo Pushing to remote...
 git push
 
 if %errorlevel%==0 (
-    echo Push successful: !comment!
+    echo Push successful: "!comment!"
 ) else (
     echo Push failed. Please check network or repo status.
 )
