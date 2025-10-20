@@ -444,22 +444,212 @@ Zookeeper 的底层实现基于 ZAB 协议，通过 Leader 选举 机制确保�
 SupaBase + prisma-AI
 
 ### unknown2
-KV 存储如何容错
-Raft leader 选举
-Raft 如何高可用
-LSM tree 原理
-正则表达式 * 和 ？的区别
-环形链表有什么用
-堆排序原理，和冒泡排序空间效率区别
-UDP 和 TCP 的应用场景
+#### 1. KV 存储如何容错：
+KV 存储系统通过数据复制和冗余来实现容错。常见的做法是将数据分布到多个节点上，并使用副本机制（如复制因子）来保证数据不丢失。例如，基于 Raft 或 Paxos 协议的分布式 KV 存储会在不同节点之间维护数据的一致性，并在节点发生故障时自动恢复数据。
 
+#### 2. Raft leader 选举：
+Raft 是一种一致性算法，用于管理分布式系统中的日志复制。Raft 的 Leader 选举机制是通过多数节点投票来选举出一个 Leader。每个节点都有一个任期（term），Leader 由一个任期内的节点选举产生。当一个节点未收到心跳信号时，它会发起选举，节点会投票给自己或其他候选人，直到一个节点获得超过半数的投票并成为 Leader。
+
+#### 3. Raft 如何高可用：
+Raft 通过保证每个日志条目的复制到多数节点来实现高可用性。即使一些节点失效，只要大多数节点正常，系统仍然可以保持一致性并继续工作。在节点故障后，Raft 会通过 Leader 选举确保系统始终有一个 Leader 进行决策。
+
+#### 4. LSM tree 原理：
+LSM（Log-Structured Merge Tree）是一种高效的写入优化数据结构，常用于 KV 存储系统（如 LevelDB）。它将写操作先记录到内存中的 MemTable，然后定期将 MemTable 的数据刷新到磁盘。磁盘上存储的数据被组织成多个层级，逐层合并（merge）以减少磁盘空间的使用和查找延迟。
+
+#### 5. 正则表达式 * 和 ？的区别：
+
+*：表示前面的字符可以重复零次或多次。例如，a* 匹配空字符串、a、aa 等。
+
+?：表示前面的字符可以出现零次或一次。例如，a? 匹配空字符串或 a。
+
+#### 6. 正则表达式 * 和 ？的区别：
+环形链表是一种特殊的链表结构，其中最后一个节点的指针指向第一个节点，形成一个闭环。它常用于需要循环访问数据的场景，如操作系统中的任务调度、网络协议中的缓冲区管理等。
+
+#### 7. 堆排序原理，和冒泡排序空间效率区别：
+
+堆排序：堆排序是一种基于堆数据结构的排序算法，时间复杂度为 O(n log n)。它通过构建最大堆（或最小堆）来排序，通过不断取出堆顶元素并调整堆的结构实现排序。
+
+冒泡排序：冒泡排序是一种简单的排序算法，通过相邻元素比较并交换的位置来逐步将最大（或最小）元素“冒泡”到序列的末尾。其时间复杂度为 O(n²)。
+
+空间效率区别：堆排序是原地排序，只需要 O(1) 的额外空间；冒泡排序也是原地排序，空间复杂度为 O(1)。
+
+UDP 和 TCP 的应用场景：
+
+UDP：适用于需要快速传输、对实时性要求较高、且可以容忍丢包的场景，如视频流、语音通信、在线游戏等。
+
+TCP：适用于要求可靠传输、数据完整性和顺序保证的场景，如文件传输、网页浏览、电子邮件等。
 ### unknown3
-1.用位运算判断奇偶数2.一个整数对1024取模
-3.任意的m对n取模，不能用除法和取模
-运算符
-求m除n，保留k位小数，返回字符串形式
-5.z字形矩阵生成
+1.用位运算判断奇偶数
+``` java
+public class OddEven {
+    public static boolean isOdd(int n) {
+        return (n & 1) != 0;  // 奇数返回 true，偶数返回 false
+    }
+    
+    public static void main(String[] args) {
+        System.out.println(isOdd(5));  // true
+        System.out.println(isOdd(6));  // false
+    }
+}
+
+```
+2.一个整数对1024取模
+``` java
+public class Mod1024 {
+    public static int mod1024(int n) {
+        return n & 1023;  // 等价于 n % 1024
+    }
+
+    public static void main(String[] args) {
+        System.out.println(mod1024(2048));  // 1024
+    }
+}
+
+```
+2.任意的m对n取模，不能用除法和取模运算符
+``` java
+public class ModWithoutOperators {
+    public static int modWithoutDivision(int m, int n) {
+        while (m >= n) {
+            m -= n;
+        }
+        return m;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(modWithoutDivision(2048, 1024));  // 0
+        System.out.println(modWithoutDivision(1234, 100));   // 34
+    }
+}
+```
+3.求m除n，保留k位小数，返回字符串形式
+``` java
+public class DivisionWithPrecision {
+    public static String divideAndFormat(double m, double n, int k) {
+        String format = "%." + k + "f";
+        return String.format(format, m / n);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(divideAndFormat(5.0, 3.0, 2));  // 1.67
+        System.out.println(divideAndFormat(10.0, 3.0, 3)); // 3.333
+    }
+}
+
+```
+4.z字形矩阵生成
+``` java
+import java.util.*;
+
+public class ZMatrix {
+    public static int[][] generateZMatrix(int n, int m) {
+        int[][] matrix = new int[n][m];
+        int num = 1;
+
+        for (int diag = 0; diag < n + m - 1; diag++) {
+            if (diag % 2 == 0) {
+                int x = Math.min(diag, n - 1);
+                int y = diag - x;
+                while (x >= 0 && y < m) {
+                    matrix[x][y] = num++;
+                    x--;
+                    y++;
+                }
+            } else {
+                int y = Math.min(diag, m - 1);
+                int x = diag - y;
+                while (y >= 0 && x < n) {
+                    matrix[x][y] = num++;
+                    x++;
+                    y--;
+                }
+            }
+        }
+
+        return matrix;
+    }
+
+    public static void printMatrix(int[][] matrix) {
+        for (int[] row : matrix) {
+            for (int num : row) {
+                System.out.print(num + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    public static void main(String[] args) {
+        int[][] result = generateZMatrix(4, 5);
+        printMatrix(result);
+    }
+}
+
+```
 海量数据当中如何对敏感词过滤
+``` java
+import java.util.*;
+
+class TrieNode {
+    Map<Character, TrieNode> children = new HashMap<>();
+    boolean isEndOfWord = false;
+}
+
+class Trie {
+    TrieNode root = new TrieNode();
+
+    public void insert(String word) {
+        TrieNode node = root;
+        for (char c : word.toCharArray()) {
+            node.children.putIfAbsent(c, new TrieNode());
+            node = node.children.get(c);
+        }
+        node.isEndOfWord = true;
+    }
+
+    public boolean search(String word) {
+        TrieNode node = root;
+        for (char c : word.toCharArray()) {
+            node = node.children.get(c);
+            if (node == null) {
+                return false;
+            }
+        }
+        return node.isEndOfWord;
+    }
+}
+
+public class SensitiveWordFilter {
+    public static String filterSensitiveWords(String text, List<String> sensitiveWords) {
+        Trie trie = new Trie();
+        for (String word : sensitiveWords) {
+            trie.insert(word);
+        }
+
+        StringBuilder result = new StringBuilder();
+        StringBuilder temp = new StringBuilder();
+
+        for (char c : text.toCharArray()) {
+            temp.append(c);
+            if (trie.search(temp.toString())) {
+                result.append("*".repeat(temp.length()));  // 用星号替代敏感词
+                temp.setLength(0);  // 重置 temp
+            } else {
+                result.append(c);
+            }
+        }
+
+        return result.toString();
+    }
+
+    public static void main(String[] args) {
+        List<String> sensitiveWords = Arrays.asList("bad", "sensitive");
+        String text = "This is a bad example with sensitive data.";
+
+        System.out.println(filterSensitiveWords(text, sensitiveWords));
+    }
+}
+
+```
 
 
 ### unknow4
